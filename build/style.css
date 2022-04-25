@@ -1,0 +1,115 @@
+* {
+    font-family: Arial;
+}
+h1 {
+    text-align: center;
+}
+
+#menu-cont {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+#menu-cont div {
+    display: flex;
+    margin: .25rem;
+}
+
+.menu-button {
+    border: 2px solid gray;
+    border-radius: 3px;
+    margin-left: .1rem;
+    margin-right: .1rem;
+    background-color: #EEEEEE;
+}
+
+.menu-button:hover {
+    background-color: #DDDDDD;
+    transition: 0.2s;
+}
+
+#game-board {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.letter-box {
+    border: 2px solid gray;
+    border-radius: 3px;
+    margin: 2px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    height: 3rem;
+    width: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+}
+
+.filled-box {
+    border: 2px solid black;
+}
+
+.letter-row {
+    display: flex;
+}
+
+.board-row {
+    display: flex;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.board-column {
+    display: flex;
+    flex-direction: column;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+#game-board-offset-block {
+    display: flex;
+    background-color: #FFFFFF;
+    width: 100%;
+    height: 9rem;
+}
+
+#keyboard-backing {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    background-color: #FFFFFF;
+    width: 100%;
+    height: 9rem;
+}
+
+#keyboard-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    bottom: .5rem;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+#keyboard-cont div {
+    display: flex;
+}
+
+.second-row {
+    margin: 0.5rem 0;
+}
+
+.keyboard-button {
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.5rem;
+    margin: 0 2px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
