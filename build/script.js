@@ -136,13 +136,7 @@ document.addEventListener("keydown", (e) => {
     if (guessesRemaining === 0) {
         return
     }
-    let isWin = true
-    for (let i = 0; i < numBoards; i++) {
-        if (!boardsSolved[i]) {
-            isWin = false
-        }
-    }
-    if (isWin) {
+    if (isWon()) {
         return
     }
 
@@ -153,7 +147,8 @@ document.addEventListener("keydown", (e) => {
     }
 
     if (pressedKey === "Enter") {
-        checkGuess()
+        checkGuess(true)
+        saveState()
         return
     }
 
@@ -179,8 +174,6 @@ function insertLetter (pressedKey) {
             continue
         }
         let row = document.getElementsByClassName("letter-row")[(numberOfGuesses - guessesRemaining) + numberOfGuesses*i]
-        console.log(document.getElementsByClassName("letter-row").length)
-        console.log((numberOfGuesses - guessesRemaining) + numberOfGuesses*i)
         let box = row.children[nextLetter]
         animateCSS(box, "pulse")
         box.textContent = pressedKey
@@ -202,7 +195,7 @@ function deleteLetter () {
     nextLetter -= 1
 }
 
-function checkGuess () {
+function checkGuess (doAnimate) {
 
     let guessString = ''
 
@@ -250,14 +243,20 @@ function checkGuess () {
                 rightGuess[letterPosition] = "#"
             }
 
-            let delay = 200 *j
-            setTimeout(()=> {
-                //flip box
-                animateCSS(box, 'flipInX')
-                //shade box
+            if (doAnimate) {
+                let delay = 200 *j
+                setTimeout(()=> {
+                    //flip box
+                    animateCSS(box, 'flipInX')
+                    //shade box
+                    box.style.backgroundColor = letterColor
+                    shadeKeyBoard(letter, letterColor)
+                }, delay)
+            }
+            else {
                 box.style.backgroundColor = letterColor
                 shadeKeyBoard(letter, letterColor)
-            }, delay)
+            }
         }
         if (guessString === rightGuesses[i]) {
             boardsSolved[i] = true;
@@ -269,14 +268,18 @@ function checkGuess () {
     checkWin();
 }
 
-function checkWin() {
+function isWon() {
     let isWin = true
     for (let i = 0; i < numBoards; i++) {
         if (!boardsSolved[i]) {
             isWin = false
         }
     }
-    if (isWin) {
+    return isWin;
+}
+
+function checkWin() {
+    if (isWon()) {
         toastr.info(`Congrats you won!`)
     } else {
         if (guessesRemaining === 0) {
@@ -391,6 +394,10 @@ const animateCSS = (element, animation, prefix = 'animate__') =>
 
     node.addEventListener('animationend', handleAnimationEnd, {once: true});
 });
+
+function saveState() {
+    // create cookie with currentGameMode, currentDailyPracticeMode, isWon, guessesRemaining, [words guessed already]
+}
 
 function init() {
     loadBoard()
