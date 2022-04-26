@@ -6,6 +6,7 @@ let currentGuess = [];
 let nextLetter = 0;
 let rightGuesses = [];
 let boardsSolved = [];
+let previousGuesses = [];
 
 let currentDailyPracticeMode = "Daily"
 let currentGameMode = "Wordle"
@@ -262,10 +263,11 @@ function checkGuess (doAnimate) {
             boardsSolved[i] = true;
         }
     }
-    guessesRemaining -= 1;
-    currentGuess = [];
-    nextLetter = 0;
-    checkWin();
+    guessesRemaining -= 1
+    currentGuess = []
+    nextLetter = 0
+    previousGuesses.push(guessString)
+    checkWin()
 }
 
 function isWon() {
@@ -281,6 +283,8 @@ function isWon() {
 function checkWin() {
     if (isWon()) {
         toastr.info(`Congrats you won!`)
+        let gameBoard = document.getElementById("game-board");
+        gameBoard.style.backgroundColor = "#60A915";
     } else {
         if (guessesRemaining === 0) {
             toastr.error("You've run out of guesses! Game over!")
@@ -360,7 +364,7 @@ document.getElementById("menu-cont").addEventListener("click", (e) => {
             currentGameMode = "Waffle"
             break; 
     }
-    init()
+    init(true)
 })
 
 function shadeMenuButtons() {
@@ -396,20 +400,124 @@ const animateCSS = (element, animation, prefix = 'animate__') =>
 });
 
 function saveState() {
-    // create cookie with currentGameMode, currentDailyPracticeMode, isWon, guessesRemaining, [words guessed already]
+    // create cookie with currentDailyPracticeMode-currentGameMode = [goal words], [words guessed already]
+    let name = currentDailyPracticeMode + "-" + currentGameMode
+    let value = ""
+    for (let i = 0; i < numBoards; i++) {
+        if (i !== 0) {
+            value = value + ","
+        }
+        value = value + rightGuesses[i]
+    }
+    value = value + "-"
+    for (let i = 0; i < previousGuesses.length; i++) {
+        if (i !== 0) {
+            value = value + ","
+        }
+        value = value + previousGuesses[i]
+    }
+    setCookie(name, value, 1)
 }
 
-function init() {
+function loadState(todaysFirstWord) {
+    // get cookie for current mode, and use it to populate rightGuesses and previousGuesses
+    // then checkGuess() for all the previous guesses by populating currentGuess[] (this will inherently update boardsSolved[], which will also decide win condition)
+    // if cookie doesn't exist then do nothing, init() will take care of setting up a new game
+    let state = getCookie(currentDailyPracticeMode + "-" + currentGameMode)
+    if (state === "") {
+        return
+    }
+    let stateComponents = state.split("-")
+    if (stateComponents.length !== 2) {
+        console.error("Reading bad cookie!:" + state)
+        return
+    }
+    let storedRightGuesses = stateComponents[0].split(",")
+    if (currentDailyPracticeMode === "Daily" && storedRightGuesses[0] !== todaysFirstWord) {
+        console.log("Cookie is from older daily puzzle, not using stored data")
+        return
+    }
+    rightGuesses = storedRightGuesses
+    let cookiePreviousGuesses = stateComponents[1].split(",")
+    let numPrevGuesses = cookiePreviousGuesses.length > 6 ? 6 : cookiePreviousGuesses.length
+    for (let i = 0; i < numPrevGuesses; i++) {
+        currentGuess = []
+        for (let j = 0; j < 5; j++) {
+            insertLetter(cookiePreviousGuesses[i][j])
+        }
+        checkGuess(false)
+    }
+}
+
+function setCookie(cname, cvalue, exdays) {
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    let expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    console.log("Saved cookie: " + cname + "=" + cvalue + ";" + expires + ";path=/")
+}
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        console.log("Cookie found for name:" + cname + " = " + c.substring(name.length, c.length))
+        return c.substring(name.length, c.length);
+      }
+    }
+    console.log("No cookie found for name:" + cname)
+    return "";
+}
+
+function getDailyWord(wordIndex) {
+    const d = new Date();
+    const firstDay = 1650956400000 // April 26, 2022
+    const msPerDay = 86400000
+    let daysPassed = Math.floor((d.getTime() - firstDay) / msPerDay)
+    return WORDS[hash("" + daysPassed + wordIndex) % WORDS.length]
+}
+
+function hash (inputStr) {
+    var hash = 0, i, chr;
+    if (inputStr.length === 0) {
+        return hash
+    }
+    for (i = 0; i < inputStr.length; i++) {
+      chr   = inputStr.charCodeAt(i);
+      hash  = ((hash << 5) - hash) + chr;
+      hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
+
+function init(doLoadState) {
     loadBoard()
     shadeMenuButtons()
     rightGuesses = []
     boardsSolved = []
+    previousGuesses = []
+
     for (let i = 0; i < numBoards; i++) {
-        let rightGuessString = WORDS[Math.floor(Math.random() * WORDS.length)]
+        let rightGuessString = ""
+        if (currentDailyPracticeMode === "Daily") {
+            rightGuessString = getDailyWord(numBoards + i)
+        }
+        else {
+            rightGuessString = WORDS[Math.floor(Math.random() * WORDS.length)]
+        }
         rightGuesses[i] = rightGuessString
         boardsSolved[i] = false
+    }
+    if (doLoadState) {
+        loadState(rightGuesses[0])
     }
     console.log(rightGuesses)
 }
 
-init()
+init(true)
