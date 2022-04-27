@@ -14,6 +14,9 @@ let numBoards = 1
 
 function loadBoard() {
     clearBoard()
+    if (currentDailyPracticeMode === "Practice") {
+        addNewGameButton()
+    }
     switch (currentGameMode) {
         case "Wordle":
             loadWordle()
@@ -34,10 +37,22 @@ function loadBoard() {
 }
 
 function clearBoard() {
+    let newGame = document.getElementById("new-game-cont");
+    while (newGame.firstChild) {
+        newGame.removeChild(newGame.firstChild)
+    }
     let board = document.getElementById("game-board");
     while (board.firstChild) {
         board.removeChild(board.firstChild);
     }
+}
+
+function addNewGameButton() {
+    let newGame = document.getElementById("new-game-cont")
+    let button = document.createElement("button")
+    button.textContent = "New Game"
+    button.className = "new-game-button"
+    newGame.appendChild(button)
 }
 
 function loadWordle() {
@@ -311,6 +326,12 @@ function shadeKeyBoard(letter, color) {
     }
 }
 
+function clearKeyBoard() {
+    for (const elem of document.getElementsByClassName("keyboard-button")) {
+        elem.style.backgroundColor = "#EEEEEE"
+    }
+}
+
 document.getElementById("keyboard-cont").addEventListener("click", (e) => {
     const target = e.target
     
@@ -365,6 +386,15 @@ document.getElementById("menu-cont").addEventListener("click", (e) => {
             break; 
     }
     init(true)
+})
+
+document.getElementById("new-game-cont").addEventListener("click", (e) => {
+    const target = e.target
+    
+    if (!target.classList.contains("new-game-button")) {
+        return
+    }
+    init(false)
 })
 
 function shadeMenuButtons() {
@@ -499,6 +529,7 @@ function hash (inputStr) {
 function init(doLoadState) {
     loadBoard()
     shadeMenuButtons()
+    clearKeyBoard()
     rightGuesses = []
     boardsSolved = []
     previousGuesses = []

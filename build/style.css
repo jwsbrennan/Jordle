@@ -58,10 +58,16 @@ h1 {
     display: flex;
 }
 
+#new-game-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: .5rem;
+}
+
 .board-row {
     display: flex;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .board-column {
