@@ -552,7 +552,16 @@ const animateCSS = (element, animation, prefix = 'animate__') =>
 function saveWinStats() {
     let name = "Stats-" + currentDailyPracticeMode + "-" + currentGameMode
     let value = ""
-    let statsList = wordlePracticeStats
+    let statsList = []
+    if (currentGameMode === "Wordle") {
+        currentDailyPracticeMode === "Daily" ? statsList = wordleDailyStats : statsList = wordlePracticeStats
+    }
+    else if (currentGameMode === "Quordle") {
+        currentDailyPracticeMode === "Daily" ? statsList = quordleDailyStats : statsList = quordlePracticeStats
+    }
+    else {
+        currentDailyPracticeMode === "Daily" ? statsList = octordleDailyStats : statsList = octordlePracticeStats
+    }
     for (let i = 0; i < numberOfGuesses; i++) {
         if (i !== 0) {
             value = value + ","
@@ -573,7 +582,6 @@ function loadWinStatsForMode(dailyPracticeMode) {
         return
     }
     let statsList = stats.split(",")
-    console.log("Joe -- statsList is " + statsList)
     if (statsList.length !== numberOfGuesses) {
         console.error("Reading bad cookie!:" + stats)
         return
