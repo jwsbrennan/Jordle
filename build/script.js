@@ -7,6 +7,13 @@ let nextLetter = 0;
 let rightGuesses = [];
 let boardsSolved = [];
 let previousGuesses = [];
+let wordleDailyStats = [0, 0, 0, 0, 0, 0];
+let wordlePracticeStats = [0, 0, 0, 0, 0, 0];
+let quordleDailyStats = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+let quordlePracticeStats = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+let octordleDailyStats = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+let octordlePracticeStats = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
 
 let currentDailyPracticeMode = "Daily"
 let currentGameMode = "Wordle"
@@ -42,6 +49,7 @@ function clearBoard() {
         newGame.removeChild(newGame.firstChild)
     }
     let board = document.getElementById("game-board");
+    board.style.backgroundColor = "#FFFFFF"
     while (board.firstChild) {
         board.removeChild(board.firstChild);
     }
@@ -146,6 +154,68 @@ function loadWaffle() {
     
 }
 
+function showStats() {
+    clearKeyBoard(true)
+    shadeMenuButtons()
+    clearBoard()
+    loadWinStats()
+    let stats = document.getElementById("game-board");
+    let statRow = document.createElement("div")
+    statRow.className = "stat-row"
+    let statColDaily = document.createElement("div")
+    statColDaily.className = "stat-column"
+    let statColPractice = document.createElement("div")
+    statColPractice.className = "stat-column"
+    fillStatsCont("Daily", statColDaily)
+    fillStatsCont("Practice", statColPractice)
+
+    statRow.appendChild(statColDaily)
+    statRow.appendChild(statColPractice)
+    stats.appendChild(statRow)
+}
+
+function fillStatsCont(dailyPracticeMode, statsCol) {
+    let numGuessesAllowed = 0
+    switch (currentGameMode) {
+        case "Wordle":
+            numGuessesAllowed = 6
+            break;
+        case "Quordle":
+            numGuessesAllowed = 9
+            break;
+        case "Octordle":
+            numGuessesAllowed = 13
+            break;
+    }
+    let title = document.createElement("div")
+    title.textContent = dailyPracticeMode + " " + currentGameMode + " Statistics"
+    statsCol.appendChild(title)
+    let avgGuesses = document.createElement("div")
+    avgGuesses.textContent = "Average guesses to solve: "
+    statsCol.appendChild(avgGuesses)
+    for (let i = 1; i < numGuessesAllowed + 1; i++) {
+        let puzzleByGuesses = document.createElement("div")
+        let numSolved = getNumSolved(dailyPracticeMode, currentGameMode, i-1)
+        puzzleByGuesses.textContent = currentGameMode + "s solved in " + i + " guesses: " + numSolved
+        statsCol.appendChild(puzzleByGuesses)
+    }
+}
+
+function getNumSolved(dailyPracticeMode, currentGameMode, index) {
+    let numSolved = 0;
+    switch (currentGameMode) {
+        case "Wordle":
+            dailyPracticeMode === "Daily" ? numSolved = wordleDailyStats[index] : numSolved = wordlePracticeStats[index]
+            break; 
+        case "Quordle":
+            dailyPracticeMode === "Daily" ? numSolved = quordleDailyStats[index] : numSolved = quordlePracticeStats[index]
+            break; 
+        case "Octordle":
+            dailyPracticeMode === "Daily" ? numSolved = octordleDailyStats[index] : numSolved = octordlePracticeStats[index]
+            break; 
+    }
+    return numSolved;
+}
 
 document.addEventListener("keydown", (e) => {
     e.preventDefault()
@@ -282,7 +352,7 @@ function checkGuess (doAnimate) {
     currentGuess = []
     nextLetter = 0
     previousGuesses.push(guessString)
-    checkWin()
+    checkWin(doAnimate)
 }
 
 function isWon() {
@@ -295,7 +365,12 @@ function isWon() {
     return isWin;
 }
 
-function checkWin() {
+function checkWin(doAnimate) {
+    if (doAnimate) {
+        if (isWon()) {
+            updateWinStats()
+        }
+    }
     if (isWon()) {
         toastr.info(`Congrats you won!`)
         let gameBoard = document.getElementById("game-board");
@@ -306,6 +381,38 @@ function checkWin() {
             toastr.info(`The right words were: "${rightGuesses}"`)
         }
     }
+}
+
+function updateWinStats() {
+    let guessesUsed = numberOfGuesses - guessesRemaining
+    guessesUsed = guessesUsed - 1 //subtract one to allow for 0-based list indexing
+    switch (currentGameMode) {
+        case "Wordle":
+            if (currentDailyPracticeMode === "Daily") {
+                wordleDailyStats[guessesUsed] = wordleDailyStats[guessesUsed] + 1
+            }
+            else {
+                wordlePracticeStats[guessesUsed] = wordlePracticeStats[guessesUsed] + 1
+            }
+            break;
+        case "Quordle":
+            if (currentDailyPracticeMode === "Daily") {
+                quordleDailyStats[guessesUsed] = quordleDailyStats[guessesUsed] + 1
+            }
+            else {
+                quordlePracticeStats[guessesUsed] = quordlePracticeStats[guessesUsed] + 1
+            }
+            break;
+        case "Octordle":
+            if (currentDailyPracticeMode === "Daily") {
+                octordleDailyStats[guessesUsed] = octordleDailyStats[guessesUsed] + 1
+            }
+            else {
+                octordlePracticeStats[guessesUsed] = octordlePracticeStats[guessesUsed] + 1
+            }
+            break;
+    }
+    saveWinStats()
 }
 
 function shadeKeyBoard(letter, color) {
@@ -326,7 +433,15 @@ function shadeKeyBoard(letter, color) {
     }
 }
 
-function clearKeyBoard() {
+function clearKeyBoard(doHide) {
+    if (doHide) {
+        // set transparency of div and everything in it to 100%
+        document.getElementById("keyboard-cont").style.display = "none"
+    }
+    else {
+        // set transparency of div and everything in it to 0%
+        document.getElementById("keyboard-cont").style.display = "flex"
+    }
     for (const elem of document.getElementsByClassName("keyboard-button")) {
         elem.style.backgroundColor = "#EEEEEE"
     }
@@ -385,7 +500,12 @@ document.getElementById("menu-cont").addEventListener("click", (e) => {
             currentGameMode = "Waffle"
             break; 
     }
-    init(true)
+    if (currentDailyPracticeMode === "View Stats") {
+        showStats()
+    } 
+    else {
+        init(true)
+    }
 })
 
 document.getElementById("new-game-cont").addEventListener("click", (e) => {
@@ -428,6 +548,55 @@ const animateCSS = (element, animation, prefix = 'animate__') =>
 
     node.addEventListener('animationend', handleAnimationEnd, {once: true});
 });
+
+function saveWinStats() {
+    let name = "Stats-" + currentDailyPracticeMode + "-" + currentGameMode
+    let value = ""
+    let statsList = wordlePracticeStats
+    for (let i = 0; i < numberOfGuesses; i++) {
+        if (i !== 0) {
+            value = value + ","
+        }
+        value = value + statsList[i]
+    }
+    setCookie(name, value, 1)
+}
+
+function loadWinStats() {
+    loadWinStatsForMode("Daily")
+    loadWinStatsForMode("Practice")
+}
+
+function loadWinStatsForMode(dailyPracticeMode) {
+    let stats = getCookie("Stats-" + dailyPracticeMode + "-" + currentGameMode)
+    if (stats === "") {
+        return
+    }
+    let statsList = stats.split(",")
+    console.log("Joe -- statsList is " + statsList)
+    if (statsList.length !== numberOfGuesses) {
+        console.error("Reading bad cookie!:" + stats)
+        return
+    }
+    let statsListInts = listToIntList(statsList)
+    if (currentGameMode === "Wordle") {
+        dailyPracticeMode === "Daily" ? wordleDailyStats = statsListInts : wordlePracticeStats = statsListInts
+    }
+    else if (currentGameMode === "Quordle") {
+        dailyPracticeMode === "Daily" ? quordleDailyStats = statsListInts : quordlePracticeStats = statsListInts
+    }
+    else {
+        dailyPracticeMode === "Daily" ? octordleDailyStats = statsListInts : octordlePracticeStats = statsListInts
+    }
+}
+
+function listToIntList(statsList) {
+    let statsListInts = []
+    for (let i = 0; i < statsList.length; i++) {
+        statsListInts[i] = parseInt(statsList[i])
+    }
+    return statsListInts
+}
 
 function saveState() {
     // create cookie with currentDailyPracticeMode-currentGameMode = [goal words], [words guessed already]
@@ -529,7 +698,7 @@ function hash (inputStr) {
 function init(doLoadState) {
     loadBoard()
     shadeMenuButtons()
-    clearKeyBoard()
+    clearKeyBoard(false)
     rightGuesses = []
     boardsSolved = []
     previousGuesses = []
