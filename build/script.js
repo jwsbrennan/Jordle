@@ -34,9 +34,6 @@ function loadBoard() {
         case "Octordle":
             loadOctordle()
             break;
-        case "Waffle":
-            loadWaffle()
-            break;
     }
     guessesRemaining = numberOfGuesses;
     nextLetter = 0;
@@ -148,10 +145,6 @@ function loadOctordle() {
         }
         board.appendChild(boardRow)
     }
-}
-
-function loadWaffle() {
-    
 }
 
 function showStats() {
@@ -459,7 +452,7 @@ document.getElementById("keyboard-cont").addEventListener("click", (e) => {
         key = "Backspace"
     } 
 
-    document.dispatchEvent(new KeyboardEvent("keyup", {'key': key}))
+    document.dispatchEvent(new KeyboardEvent("keydown", {'key': key}))
 })
 
 
@@ -495,10 +488,6 @@ document.getElementById("menu-cont").addEventListener("click", (e) => {
         case "Octordle":
             currentGameMode = "Octordle"
             break;
-                    
-        case "Waffle":
-            currentGameMode = "Waffle"
-            break; 
     }
     if (currentDailyPracticeMode === "View Stats") {
         showStats()
