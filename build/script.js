@@ -172,12 +172,15 @@ function fillStatsCont(dailyPracticeMode, statsCol) {
     switch (currentGameMode) {
         case "Wordle":
             numGuessesAllowed = 6
+            numBoards = 1
             break;
         case "Quordle":
             numGuessesAllowed = 9
+            numBoards = 4
             break;
         case "Octordle":
             numGuessesAllowed = 13
+            numBoards = 8
             break;
     }
     let title = document.createElement("div")
@@ -186,12 +189,25 @@ function fillStatsCont(dailyPracticeMode, statsCol) {
     let avgGuesses = document.createElement("div")
     avgGuesses.textContent = "Average guesses to solve: "
     statsCol.appendChild(avgGuesses)
-    for (let i = 1; i < numGuessesAllowed + 1; i++) {
+    let totalGamesSolved = 0
+    let totalGuessesUsed = 0
+    for (let i = numBoards; i < numGuessesAllowed + 1; i++) {
         let puzzleByGuesses = document.createElement("div")
         let numSolved = getNumSolved(dailyPracticeMode, currentGameMode, i-1)
+        totalGuessesUsed += i * numSolved
+        totalGamesSolved += numSolved
         puzzleByGuesses.textContent = currentGameMode + "s solved in " + i + " guesses: " + numSolved
         statsCol.appendChild(puzzleByGuesses)
     }
+
+    let avgScore = 0
+    if (totalGamesSolved == 0) {
+        avgScore = 0
+    } else {
+        avgScore = totalGuessesUsed / totalGamesSolved
+    }
+    avgScore = avgScore.toFixed(1)
+    avgGuesses.textContent = "Average guesses to solve: " + avgScore
 }
 
 function getNumSolved(dailyPracticeMode, currentGameMode, index) {
