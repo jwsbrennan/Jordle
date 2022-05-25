@@ -635,7 +635,7 @@ function loadState(todaysFirstWord) {
     }
     rightGuesses = storedRightGuesses
     let cookiePreviousGuesses = stateComponents[1].split(",")
-    let numPrevGuesses = cookiePreviousGuesses.length > 6 ? 6 : cookiePreviousGuesses.length
+    let numPrevGuesses = cookiePreviousGuesses.length > numberOfGuesses ? numberOfGuesses : cookiePreviousGuesses.length
     for (let i = 0; i < numPrevGuesses; i++) {
         currentGuess = []
         for (let j = 0; j < 5; j++) {
