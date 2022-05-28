@@ -1,4 +1,5 @@
-import { WORDS } from "./words.js";
+import { WORDLE_SOLUTION_WORDS } from "./words.js";
+import { WORDLE_DICT_WORDS } from "./words.js";
 
 let numberOfGuesses = 6;
 let guessesRemaining = numberOfGuesses;
@@ -242,8 +243,9 @@ document.addEventListener("keydown", (e) => {
     }
 
     if (pressedKey === "Enter") {
-        checkGuess(true)
-        saveState()
+        if (checkGuess(true)) {
+            saveState()
+        }
         return
     }
 
@@ -290,6 +292,7 @@ function deleteLetter () {
     nextLetter -= 1
 }
 
+// returns boolean of whether the guess was a valid guess
 function checkGuess (doAnimate) {
 
     let guessString = ''
@@ -300,12 +303,12 @@ function checkGuess (doAnimate) {
 
     if (guessString.length != 5) {
         toastr.error("Not enough letters!")
-        return
+        return false
     }
 
-    if (!WORDS.includes(guessString)) {
+    if (!WORDLE_DICT_WORDS.includes(guessString) && !WORDLE_SOLUTION_WORDS.includes(guessString)) {
         toastr.error("Word not in list!")
-        return
+        return false
     }
 
     for (let i = 0; i < numBoards; i++) {
@@ -364,6 +367,7 @@ function checkGuess (doAnimate) {
     nextLetter = 0
     previousGuesses.push(guessString)
     checkWin(doAnimate)
+    return true
 }
 
 // console.log("Joe test:")
@@ -745,7 +749,7 @@ function getDailyWord(wordIndex) {
     const firstDay = 1650956400000 // April 26, 2022
     const msPerDay = 86400000
     let daysPassed = Math.floor((d.getTime() - firstDay) / msPerDay)
-    return WORDS[hash("" + daysPassed + wordIndex) % WORDS.length]
+    return WORDLE_SOLUTION_WORDS[hash("" + daysPassed + wordIndex) % WORDLE_SOLUTION_WORDS.length]
 }
 
 function hash (inputStr) {
@@ -775,7 +779,7 @@ function init(doLoadState) {
             rightGuessString = getDailyWord(numBoards + i)
         }
         else {
-            rightGuessString = WORDS[Math.floor(Math.random() * WORDS.length)]
+            rightGuessString = WORDLE_SOLUTION_WORDS[Math.floor(Math.random() * WORDLE_SOLUTION_WORDS.length)]
         }
         rightGuesses[i] = rightGuessString
         boardsSolved[i] = false
