@@ -314,29 +314,31 @@ function checkGuess (doAnimate) {
         }
         let row = document.getElementsByClassName("letter-row")[numberOfGuesses - guessesRemaining + numberOfGuesses*i]
         let rightGuess = Array.from(rightGuesses[i])
+        let letterColors = calculateColors(currentGuess, rightGuess)
         for (let j = 0; j < 5; j++) {
             let letterColor = ''
             let box = row.children[j]
             let letter = currentGuess[j]
             
-            let letterPosition = rightGuess.indexOf(currentGuess[j])
-            // is letter in the correct guess
-            if (letterPosition === -1) {
-                letterColor = 'grey'
-            } else {
-                // now, letter is definitely in word
-                // if letter index and right guess index are the same
-                // letter is in the right position 
-                if (currentGuess[j] === rightGuess[j]) {
-                    // shade green 
-                    letterColor = 'green'
-                } else {
-                    // shade box yellow
-                    letterColor = 'yellow'
-                }
+            // let letterPosition = rightGuess.indexOf(currentGuess[j])
+            // // is letter in the correct guess
+            // if (letterPosition === -1) {
+            //     letterColor = 'grey'
+            // } else {
+            //     // now, letter is definitely in word
+            //     // if letter index and right guess index are the same
+            //     // letter is in the right position 
+            //     if (currentGuess[j] === rightGuess[j]) {
+            //         // shade green 
+            //         letterColor = 'green'
+            //     } else {
+            //         // shade box yellow
+            //         letterColor = 'yellow'
+            //     }
 
-                rightGuess[letterPosition] = "#"
-            }
+            //     rightGuess[letterPosition] = "#"
+            // }
+            letterColor = letterColors[j]
 
             if (doAnimate) {
                 let delay = 200 *j
@@ -362,6 +364,57 @@ function checkGuess (doAnimate) {
     nextLetter = 0
     previousGuesses.push(guessString)
     checkWin(doAnimate)
+}
+
+// console.log("Joe test:")
+// console.log("guess 'green' for word 'green' should be all greens. Calculated as: " + calculateColors("green", "green"))
+// console.log("guess 'green' for word 'poops' should be all grays. Calculated as: " + calculateColors("green", "poops"))
+// console.log("guess 'green' for word 'trace' should be gray,green,yellow,gray,gray. Calculated as: " + calculateColors("green", "trace"))
+// console.log("guess 'eelsa' for word 'green' should be yellow,yellow,gray,gray,gray. Calculated as: " + calculateColors("eelsa", "green"))
+// console.log("guess 'pecks' for word 'green' should be gray,yellow,gray,gray,gray. Calculated as: " + calculateColors("pecks", "green"))
+
+
+function calculateColors(guessWord, rightWord) {
+    // requires two passes through the guess word
+    // first pass, just mark the correct letter placements as green
+    let letterColors = ['','','','','']
+    for (let i = 0; i < 5; i++) {
+        if (guessWord[i] === rightWord[i]) {
+            letterColors[i] = 'green'
+        }
+    }
+
+    // second pass, in reverse order compare the number of instances of each non-green 
+    // letter to see which should be yellow and which should be gray
+    for (let i = 4; i >= 0; i--) {
+        if (letterColors[i] === 'green') {
+            continue;
+        }
+        let instancesInRightWord = countInstances(guessWord[i], rightWord)
+        if (instancesInRightWord === 0) {
+            letterColors[i] = 'grey'
+            continue;
+        }
+        let instancesInGuessWord = countInstances(guessWord[i], guessWord.slice(0, i+1))
+        if (instancesInGuessWord > instancesInRightWord) {
+            // there are extra instances of the letter that can't be colored yellow
+            letterColors[i] = 'grey'
+        }
+        else {
+            letterColors[i] = 'yellow'
+        }
+    }
+    return letterColors
+}
+
+function countInstances(letter, word){
+    let count = 0
+    for (let i = 0; i < 5; i++) {
+        if (word[i] === letter) {
+            count++
+        }
+    }
+    return count
 }
 
 function isWon() {
